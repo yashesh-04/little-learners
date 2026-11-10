@@ -792,3 +792,24 @@ html { scroll-behavior: smooth; }
   .popup-card { max-width: none; border-radius: 24px 24px 0 0; padding-bottom: 26px; animation-name: popupSheet; }
 }
 @keyframes popupSheet { from { transform: translateY(100%); } to { transform: none; } }
+
+.popup-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 18px;
+  background: #16834a;
+  color: white;
+  text-decoration: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background 0.2s ease;
+  box-sizing: border-box;
+}
+
+.popup-download:hover {
+  background: #106b3b;
+}

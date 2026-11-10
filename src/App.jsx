@@ -170,11 +170,38 @@ function PaymentSuccessPopup({ order, onClose, onWhatsApp }) {
           {order.names.map((name) => <div className="popup-item compact" key={name}>📘 <strong>{name}</strong></div>)}
         </div>
         <div className="popup-order-id"><small>Order ID</small><code>{order.orderId}</code></div>
-        <p className="popup-nudge">Last step: message us on WhatsApp with your order ID and we'll send your PDF download links.</p>
-        <div className="popup-actions stacked">
-          <button className="popup-whatsapp" onClick={onWhatsApp} autoFocus>Get my PDFs on WhatsApp →</button>
-          <button className="popup-secondary" onClick={onClose}>Close</button>
-        </div>
+        <div className="popup-nudge">
+  Your workbooks are ready! Download your purchased PDFs below.
+</div>
+
+<div className="popup-actions stacked">
+  {order.downloads?.length > 0 ? (
+    order.downloads.map((download) => (
+      <a
+        key={download.url}
+        href={download.url}
+        className="popup-download"
+      >
+        <span>📥</span>
+        Download {download.name}
+      </a>
+    ))
+  ) : (
+    <>
+      <p>
+        Your payment was successful, but download links are not available yet.
+        Please contact us on WhatsApp with your order ID.
+      </p>
+      <button className="popup-whatsapp" onClick={onWhatsApp}>
+        Get support on WhatsApp →
+      </button>
+    </>
+  )}
+
+  <button className="popup-secondary" onClick={onClose}>
+    Close
+  </button>
+</div>
       </div>
     </div>
   );
@@ -399,12 +426,16 @@ export default function App() {
             setPaymentSuccess(true);
             setVerifiedOrderId(response.razorpay_order_id);
             setCartPopup(null);
-            setSuccessPopup({
-              orderId: response.razorpay_order_id,
-              total,
-              names: products.filter((product) => selected.includes(product.id)).map((product) => product.name),
-            });
-            setPaymentMessage(`Payment verified! Your order ID is ${response.razorpay_order_id}. Please contact us on WhatsApp with this order ID so we can share your PDF download links.`);
+           setSuccessPopup({
+  orderId: response.razorpay_order_id,
+  total,
+  names: products.filter((product) => selected.includes(product.id)).map((product) => product.name),
+  downloads: verification.downloads || [],
+});
+
+setPaymentMessage(
+  `Payment verified! Your order ID is ${response.razorpay_order_id}.`
+);
           } catch (error) {
             setPaymentMessage(`${error.message} If money was deducted, please contact us on WhatsApp with your payment ID: ${response.razorpay_payment_id}`);
           } finally {
