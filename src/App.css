@@ -813,3 +813,15 @@ html { scroll-behavior: smooth; }
 .popup-download:hover {
   background: #106b3b;
 }
+
+
+@media (hover: none), (pointer: coarse) {
+  .view-details-hint {
+    opacity: 1;
+    visibility: visible;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+}
