@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
+import { createPortal } from "react-dom"; //added this line newly
 
 const products = [
   {
@@ -171,37 +172,37 @@ function PaymentSuccessPopup({ order, onClose, onWhatsApp }) {
         </div>
         <div className="popup-order-id"><small>Order ID</small><code>{order.orderId}</code></div>
         <div className="popup-nudge">
-  Your workbooks are ready! Download your purchased PDFs below.
-</div>
+          Your workbooks are ready! Download your purchased PDFs below.
+        </div>
 
-<div className="popup-actions stacked">
-  {order.downloads?.length > 0 ? (
-    order.downloads.map((download) => (
-      <a
-        key={download.url}
-        href={download.url}
-        className="popup-download"
-      >
-        <span>📥</span>
-        Download {download.name}
-      </a>
-    ))
-  ) : (
-    <>
-      <p>
-        Your payment was successful, but download links are not available yet.
-        Please contact us on WhatsApp with your order ID.
-      </p>
-      <button className="popup-whatsapp" onClick={onWhatsApp}>
-        Get support on WhatsApp →
-      </button>
-    </>
-  )}
+        <div className="popup-actions stacked">
+          {order.downloads?.length > 0 ? (
+            order.downloads.map((download) => (
+              <a
+                key={download.url}
+                href={download.url}
+                className="popup-download"
+              >
+                <span>📥</span>
+                Download {download.name}
+              </a>
+            ))
+          ) : (
+            <>
+              <p>
+                Your payment was successful, but download links are not available yet.
+                Please contact us on WhatsApp with your order ID.
+              </p>
+              <button className="popup-whatsapp" onClick={onWhatsApp}>
+                Get support on WhatsApp →
+              </button>
+            </>
+          )}
 
-  <button className="popup-secondary" onClick={onClose}>
-    Close
-  </button>
-</div>
+          <button className="popup-secondary" onClick={onClose}>
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -253,7 +254,14 @@ function ProductDetails({ product, isSelected, onClose, onToggle }) {
             {product.samplePages.map((sample) => (
               <button className="preview-card" key={sample.page} onClick={() => setActivePreview(sample)}>
                 <span className="preview-image-wrap"><img src={sample.image} alt={`${sample.title}, sample page ${sample.page}`} loading="lazy" /></span>
-                <span className="preview-caption"><strong>{sample.title}</strong><small>Page {sample.page} · Click to enlarge</small></span>
+                {/* <span className="preview-caption"><strong>{sample.title}</strong><small>Page {sample.page} · Click to enlarge</small></span> */}
+                {/* newly made changes are below:  */}
+                <span className="preview-caption">
+                  <strong>{sample.title}</strong>
+                  <span className="preview-fullscreen-hint">
+                    <span>⛶</span> View full screen
+                  </span>
+                </span>
               </button>
             ))}
           </div>
@@ -276,7 +284,7 @@ function ProductDetails({ product, isSelected, onClose, onToggle }) {
         </div>
       </section>
 
-      {activePreview && (
+      {/* {activePreview && (
         <div className="preview-lightbox" onMouseDown={(event) => event.target === event.currentTarget && setActivePreview(null)}>
           <button className="lightbox-close" onClick={() => setActivePreview(null)} aria-label="Close preview">×</button>
           <div className="lightbox-content">
@@ -284,6 +292,39 @@ function ProductDetails({ product, isSelected, onClose, onToggle }) {
             <p>{activePreview.title} <span>· Page {activePreview.page}</span></p>
           </div>
         </div>
+      )} */}
+      {/* newly made changes below. just comment the below part and uncomment the above part to undo changes */}
+      {activePreview && createPortal(
+        <div
+          className="preview-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Full-screen preview: ${activePreview.title}`}
+          onMouseDown={(event) =>
+            event.target === event.currentTarget && setActivePreview(null)
+          }
+        >
+          <button
+            className="lightbox-close"
+            onClick={() => setActivePreview(null)}
+            aria-label="Close preview"
+          >
+            ×
+          </button>
+
+          <div className="lightbox-content">
+            <img
+              src={activePreview.image}
+              alt={`${activePreview.title}, sample page ${activePreview.page}`}
+            />
+
+            <p>
+              {activePreview.title}
+              <span> · Page {activePreview.page}</span>
+            </p>
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -426,16 +467,16 @@ export default function App() {
             setPaymentSuccess(true);
             setVerifiedOrderId(response.razorpay_order_id);
             setCartPopup(null);
-           setSuccessPopup({
-  orderId: response.razorpay_order_id,
-  total,
-  names: products.filter((product) => selected.includes(product.id)).map((product) => product.name),
-  downloads: verification.downloads || [],
-});
+            setSuccessPopup({
+              orderId: response.razorpay_order_id,
+              total,
+              names: products.filter((product) => selected.includes(product.id)).map((product) => product.name),
+              downloads: verification.downloads || [],
+            });
 
-setPaymentMessage(
-  `Payment verified! Your order ID is ${response.razorpay_order_id}.`
-);
+            setPaymentMessage(
+              `Payment verified! Your order ID is ${response.razorpay_order_id}.`
+            );
           } catch (error) {
             setPaymentMessage(`${error.message} If money was deducted, please contact us on WhatsApp with your payment ID: ${response.razorpay_payment_id}`);
           } finally {
